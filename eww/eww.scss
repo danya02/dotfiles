@@ -13,3 +13,19 @@
 .public-ip {
   background-color: orangered
 }
+
+
+/* hyprland workspaces widget */
+.workspace-entry {
+}
+
+.workspace-entry.occupied {
+  background-color: white;
+}
+.workspace-entry.empty {
+  background-color: grey
+}
+.workspace-entry.current {
+  // background-color: red;
+  border: solid red 2px;
+}

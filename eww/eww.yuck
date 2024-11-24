@@ -1,13 +1,13 @@
 ;; WORKSPACES
-(defvar workspaces '[{"id": "1", "name": "1"}]')
-(defvar active-workspace "1")
+;(defvar workspaces '[{"id": "1", "name": "1"}]')
+;(defvar active-workspace "1")
 
-(defwidget hypr-workspaces []
-  (box
-    (for entry in workspaces
-      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
-              :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
-        "${entry.name}"))))
+;(defwidget hypr-workspaces []
+;  (box
+;    (for entry in workspaces
+;      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
+;              :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
+;        "${entry.name}"))))
 
 (defwidget info []
   (box
@@ -61,8 +61,8 @@
   (label :text "CPU ${round(EWW_CPU.avg, 1)}"))
 
 ;; KEYBOARD
-(defvar kb-model "keychron-keychron-q1v1-keyboard")
 (defvar kb-layout "English (US)")
+(defvar kb-model "at-translated-set-2-keyboard")
 ;; (defpoll is-caps :interval "0.2s"
 ;;   "cat /sys/class/leds/input21::capslock/brightness")
 
@@ -132,11 +132,30 @@
         :onrightclick "hyprctl dispatch exec '[float; size 30% 50%; move 65% 45%] pavucontrol'"
         {sink-mute == "[MUTED]" ? " " : " "}))))
 
+; Hyprland workspaces widget sample
+(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
+(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
+(defwidget workspaces []
+  (eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}" :class "workspaces-widget"
+    (box :space-evenly true
+      (label :text "${workspaces}${current_workspace}" :visible false)
+      (for workspace in workspaces
+        (eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
+          :width 32
+          (box :class "workspace-entry ${workspace.windows > 0 ? "occupied" : "empty"} ${workspace.id == current_workspace ? "current" : ""}"
+            (label :text "${workspace.id}" :class "workspace-entry ${workspace.id == current_workspace ? "current" : ""}" )
+            )
+          )
+        )
+      )
+    )
+  )
+
 ;; SIDES
 (defwidget left []
   (box :space-evenly true
        :halign "start"
-    (hypr-workspaces)))
+    (workspaces)))
 
 (defwidget center []
   (box :halign "fill"
