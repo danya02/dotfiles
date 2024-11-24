@@ -1,0 +1,169 @@
+;; WORKSPACES
+(defvar workspaces '[{"id": "1", "name": "1"}]')
+(defvar active-workspace "1")
+
+(defwidget hypr-workspaces []
+  (box
+    (for entry in workspaces
+      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
+              :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
+        "${entry.name}"))))
+
+(defwidget info []
+  (box
+    :space-evenly false
+    :spacing 10
+    (ip)
+    (net-usage)
+    (ram)
+    (cpu)))
+
+;; NETWORK
+(defwidget netinfo []
+  (box
+    :space-evenly false
+    (ip)
+    (net-usage)))
+
+(defpoll local-ip :interval "5s"
+  "ip r | grep -E 'default.*(enp|eth)' | awk '{ print $NF, $(NF-2) }' | sort | tail -n 1 | cut -d' ' -f 2")
+;; (defpoll public-ip :interval "60s"
+;;                    :initial '{"YourFuckingIPAddress": "...", "YourFuckingCountryCode": "..."}'
+;;   "curl --silent https://myip.wtf/json")
+(defpoll public-ip :interval "60s"
+                   :initial '...'
+  "curl --silent icanhazip.com")
+(defvar show-public-ip false)
+
+(defwidget ip []
+  (button :onclick "eww update show-public-ip=${!show-public-ip}"
+          :class {show-public-ip ? "public-ip" : "local-ip"}
+    (stack :transition "slideup"
+           :selected {show-public-ip ? 1 : 0}
+           :same-size true
+        local-ip
+        ;; "${public-ip.YourFuckingIPAddress} ${public-ip.YourFuckingCountryCode}")))
+        public-ip)))
+
+(defwidget net-usage []
+  (label :text "  ${round(EWW_NET.enp28s0.NET_DOWN / 1024, 2)} /   ${round(EWW_NET.enp28s0.NET_UP / 1024, 2)}"))
+
+;; SYSINFO
+(defwidget sysinfo []
+  (box
+    (ram)
+    (cpu)))
+
+(defwidget ram []
+  (label :text "RAM ${round(EWW_RAM.used_mem_perc, 1)}%"))
+
+(defwidget cpu []
+  (label :text "CPU ${round(EWW_CPU.avg, 1)}"))
+
+;; KEYBOARD
+(defvar kb-model "keychron-keychron-q1v1-keyboard")
+(defvar kb-layout "English (US)")
+;; (defpoll is-caps :interval "0.2s"
+;;   "cat /sys/class/leds/input21::capslock/brightness")
+
+(defwidget layout []
+   (button :class {"capsoff"}
+           :onclick "hyprctl switchxkblayout ${kb-model} next > /dev/null"
+           :onrightclick "hyprctl switchxkblayout ${kb-model} prev > /dev/null"
+           :width 100
+    kb-layout))
+
+;; (defwidget jp [] "Aち")
+;; (defpoll ibus-engine :interval "0.1s" "fcitx5-remote -n")
+
+(defwidget kb []
+ (box
+   :space-evenly false
+   (layout)))
+   ;; (revealer :transition "slideright"
+   ;;   :reveal {ibus-engine == "mozc" ? true : false}
+   ;;   (jp))))
+
+
+;; DATETIME
+(defpoll time :interval "1s"
+  "date +%H:%M:%S")
+(defpoll datetime :interval "1s"
+  'date "+%Y-%m-%d %H:%M:%S"')
+(defvar showdate false)
+
+(defwidget time []
+  (button :onclick "eww update showdate=${!showdate}"
+    (stack :transition "slideup"
+           :selected {showdate ? 1 : 0}
+           :same-size true
+      time
+      datetime)))
+
+;; VOLUME
+(defpoll sink-volume
+  :interval "1s"
+  :initial 0
+  "wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -d' ' -f 2")
+                       
+(defpoll sink-mute
+  :interval "0.2s"
+  "wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -d' ' -f 3")
+
+(defvar show-vol-bar false)
+(defwidget volume []
+  (eventbox :onhover "eww update show-vol-bar=true"
+    :onhoverlost "eww update show-vol-bar=false"
+    (box
+      :space-evenly false
+      :spacing 2
+      (revealer :transition "slideleft"
+        :reveal show-vol-bar
+        :duration "300ms"
+        (scale :value {sink-volume * 100}
+          :width 100
+          :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%"
+          :orientation "h"
+          :flipped false
+          :min 0
+          :max 101))
+      (button
+        :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        :onrightclick "hyprctl dispatch exec '[float; size 30% 50%; move 65% 45%] pavucontrol'"
+        {sink-mute == "[MUTED]" ? " " : " "}))))
+
+;; SIDES
+(defwidget left []
+  (box :space-evenly true
+       :halign "start"
+    (hypr-workspaces)))
+
+(defwidget center []
+  (box :halign "fill"
+       :hexpand true))
+
+(defwidget right []
+  (box :space-evenly false
+       :halign "end"
+    (info)
+    (volume)
+    (kb)
+    (time)
+    (systray :halign "end" :spacing 1 :prepend-new true)))
+
+;; WINDOW
+(defwindow bar
+  :monitor 0
+  :geometry (geometry
+             :x "0%"
+             :y "0%"
+             :width "100%"
+             :height "30px"
+             :anchor "bottom center")
+  :stacking "bottom"
+  :exclusive true
+  :focusable false
+  (centerbox :orientation "horizontal"
+    (left)
+    (center)
+    (right)))
