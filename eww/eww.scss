@@ -1,7 +1,3 @@
-.bar-root {
-  font-family: Noto Sans
-}
-
 .special {
   background-color: orangered
 }
@@ -21,15 +17,15 @@
 
 /* hyprland workspaces widget */
 .workspace-entry {
+  border: dotted white 1px;
 }
 
 .workspace-entry.occupied {
-  background-color: white;
+  background-color: unset;
 }
 .workspace-entry.empty {
   background-color: grey
 }
 .workspace-entry.current {
-  // background-color: red;
   border: solid red 2px;
 }

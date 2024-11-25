@@ -200,7 +200,6 @@
   :exclusive true
   :focusable false
   (centerbox :orientation "horizontal"
-    :class "bar-root"
     (left)
     (center)
     (right)))
