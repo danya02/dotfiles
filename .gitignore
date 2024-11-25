@@ -1,6 +1,7 @@
 *
 !*/
 !eww/**
-!mako/*
-!hypr/*
-!systemd/*
+!mako/**
+!hypr/**
+!systemd/**
+!gtk-3.0/**

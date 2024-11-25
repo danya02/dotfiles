@@ -1,0 +1,8 @@
+# custom target to enable graphical-session
+# https://github.com/soyersoyer/cameractrls/issues/46#issuecomment-2346744668
+[Unit]
+Description=Hyprland session
+Documentation=man:systemd.special
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

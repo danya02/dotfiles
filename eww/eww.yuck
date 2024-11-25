@@ -48,6 +48,19 @@
 (defwidget net-usage []
   (label :text "  ${round(EWW_NET.enp28s0.NET_DOWN / 1024, 2)} /   ${round(EWW_NET.enp28s0.NET_UP / 1024, 2)}"))
 
+;; BATTERY
+(defwidget battery [battery status one two three
+                    four five six seven charge]
+  (box :class "bat-box" :space-evenly false :spacing 8
+    (label :text {status == 'Charging' ? charge :
+      battery < 15 ? seven :
+        battery < 30 ? six :
+          battery < 45 ? five :
+            battery < 60 ? four :
+              battery < 75 ? three :
+                battery < 95 ? two : one})))
+
+
 ;; SYSINFO
 (defwidget sysinfo []
   (box
@@ -168,6 +181,10 @@
     (volume)
     (kb)
     (time)
+    (battery    :status {EWW_BATTERY.BAT1.status}
+                :battery {EWW_BATTERY.BAT1.capacity}
+                :charge "" :one "" :two "" :three "" :four ""
+                :five "" :six "" :seven "")
     (systray :halign "end" :spacing 1 :prepend-new true)))
 
 ;; WINDOW
@@ -183,6 +200,7 @@
   :exclusive true
   :focusable false
   (centerbox :orientation "horizontal"
+    :class "bar-root"
     (left)
     (center)
     (right)))
