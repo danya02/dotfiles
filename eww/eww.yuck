@@ -1,13 +1,13 @@
 ;; WORKSPACES
-;(defvar workspaces '[{"id": "1", "name": "1"}]')
-;(defvar active-workspace "1")
+(defvar workspaces '[{"id": "1", "name": "1"}]')
+(defvar active-workspace "1")
 
-;(defwidget hypr-workspaces []
-;  (box
-;    (for entry in workspaces
-;      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
-;              :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
-;        "${entry.name}"))))
+(defwidget hypr-workspaces []
+  (box
+    (for entry in workspaces
+      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
+              :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
+        "${entry.name}"))))
 
 (defwidget info []
   (box
@@ -26,12 +26,12 @@
     (net-usage)))
 
 (defpoll local-ip :interval "5s"
-  "ip r | grep -E 'default.*(enp|eth)' | awk '{ print $NF, $(NF-2) }' | sort | tail -n 1 | cut -d' ' -f 2")
+  "ip r | grep -E 'default.*(enp|eth|wlp)' | awk '{ print $NF, $(NF-2) }' | sort | tail -n 1 | cut -d' ' -f 2")
 ;; (defpoll public-ip :interval "60s"
 ;;                    :initial '{"YourFuckingIPAddress": "...", "YourFuckingCountryCode": "..."}'
 ;;   "curl --silent https://myip.wtf/json")
 (defpoll public-ip :interval "60s"
-                   :initial '...'
+                   :initial 'unknown'
   "curl --silent icanhazip.com")
 (defvar show-public-ip false)
 
@@ -46,19 +46,17 @@
         public-ip)))
 
 (defwidget net-usage []
-  (label :text "  ${round(EWW_NET.enp28s0.NET_DOWN / 1024, 2)} /   ${round(EWW_NET.enp28s0.NET_UP / 1024, 2)}"))
+  (label :text "  ${round(EWW_NET.wlp1s0.NET_DOWN / 1024, 2)} /   ${round(EWW_NET.wlp1s0.NET_UP / 1024, 2)}"))
 
 ;; BATTERY
-(defwidget battery [battery status one two three
-                    four five six seven charge]
+(defwidget battery [battery status]
   (box :class "bat-box" :space-evenly false :spacing 8
-    (label :text {status == 'Charging' ? charge :
-      battery < 15 ? seven :
-        battery < 30 ? six :
-          battery < 45 ? five :
-            battery < 60 ? four :
-              battery < 75 ? three :
-                battery < 95 ? two : one})))
+    (label
+        :text "${battery}%${status == 'Charging' ? "+" : ""}"
+        :class "bat-text ${status == 'Charging' ? 'bat-text-charging' : 'bat-text-discharging'} ${battery <= 20 ? 'bat-text-low' : 'bat-text-high'} ${battery <= 5 ? 'bat-text-critical' : ''}"
+    )
+  )
+)
 
 
 ;; SYSINFO
@@ -99,19 +97,11 @@
 
 
 ;; DATETIME
-(defpoll time :interval "1s"
-  "date +%H:%M:%S")
 (defpoll datetime :interval "1s"
   'date "+%Y-%m-%d %H:%M:%S"')
-(defvar showdate false)
 
 (defwidget time []
-  (button :onclick "eww update showdate=${!showdate}"
-    (stack :transition "slideup"
-           :selected {showdate ? 1 : 0}
-           :same-size true
-      time
-      datetime)))
+    datetime)
 
 ;; VOLUME
 (defpoll sink-volume
@@ -143,32 +133,32 @@
       (button
         :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         :onrightclick "hyprctl dispatch exec '[float; size 30% 50%; move 65% 45%] pavucontrol'"
-        {sink-mute == "[MUTED]" ? " " : " "}))))
+        "${sink-mute == "[MUTED]" ? " " : "  "} ${round(100*sink-volume, 0)}%"))))
 
 ; Hyprland workspaces widget sample
-(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
-(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
-(defwidget workspaces []
-  (eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}" :class "workspaces-widget"
-    (box :space-evenly true
-      (label :text "${workspaces}${current_workspace}" :visible false)
-      (for workspace in workspaces
-        (eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
-          :width 32
-          (box :class "workspace-entry ${workspace.windows > 0 ? "occupied" : "empty"} ${workspace.id == current_workspace ? "current" : ""}"
-            (label :text "${workspace.id}" :class "workspace-entry ${workspace.id == current_workspace ? "current" : ""}" )
-            )
-          )
-        )
-      )
-    )
-  )
+; (deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
+; (deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
+; (defwidget workspaces []
+;   (eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}" :class "workspaces-widget"
+;     (box :space-evenly true
+;       (label :text "${workspaces}${current_workspace}" :visible false)
+;       (for workspace in workspaces
+;         (eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
+;           :width 32
+;           (box :class "workspace-entry ${workspace.windows > 0 ? "occupied" : "empty"} ${workspace.id == current_workspace ? "current" : ""}"
+;             (label :text "${workspace.id}" :class "workspace-entry ${workspace.id == current_workspace ? "current" : ""}" )
+;             )
+;           )
+;         )
+;       )
+;     )
+;   )
 
 ;; SIDES
 (defwidget left []
   (box :space-evenly true
        :halign "start"
-    (workspaces)))
+    (hypr-workspaces)))
 
 (defwidget center []
   (box :halign "fill"
@@ -182,9 +172,7 @@
     (kb)
     (time)
     (battery    :status {EWW_BATTERY.BAT1.status}
-                :battery {EWW_BATTERY.BAT1.capacity}
-                :charge "" :one "" :two "" :three "" :four ""
-                :five "" :six "" :seven "")
+                :battery {EWW_BATTERY.BAT1.capacity})
     (systray :halign "end" :spacing 1 :prepend-new true)))
 
 ;; WINDOW

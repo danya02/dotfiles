@@ -5,3 +5,9 @@
 !hypr/**
 !systemd/**
 !gtk-3.0/**
+!Kvantum/**
+!gtk-2.0/**
+!gtk-3.0/**
+!fcitx/**
+!fcitx5/**
+!qt5ct/**

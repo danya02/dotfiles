@@ -1,3 +1,7 @@
+* {
+  font-family: mono;
+}
+
 .special {
   background-color: orangered
 }
@@ -28,4 +32,24 @@
 }
 .workspace-entry.current {
   border: solid red 2px;
+}
+
+/* battery widget */
+.bat-text-high {
+  color: green;
+}
+
+.bat-text-low {
+  color: yellow;
+  animation: blinking 1s linear infinite;
+}
+
+.bat-text-critical {
+  color: black;
+  animation: blinking 1s linear infinite;
+  background-color: red;
+}
+
+@keyframes blinking {
+  50% { opacity: 0.0; }
 }
