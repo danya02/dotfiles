@@ -97,8 +97,11 @@
 
 
 ;; DATETIME
-(defpoll datetime :interval "1s"
-  'date "+%Y-%m-%d %H:%M:%S"')
+;(defpoll datetime :interval "1s"
+;  'date "+%Y-%m-%d %H:%M:%S"')
+
+(deflisten datetime :initial "danya02/hyprland-utils missing"
+  "/home/danya/.cargo/bin/eww-progs clock")
 
 (defwidget time []
     datetime)
