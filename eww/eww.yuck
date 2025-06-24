@@ -1,11 +1,11 @@
 ;; WORKSPACES
-(defvar workspaces '[{"id": "1", "name": "1"}]')
-(defvar active-workspace "1")
+(deflisten workspaces :initial '[{"id": "1", "name": "danya02/hyprland-utils missing", "active": true}]'
+  "/home/danya/.cargo/bin/eww-progs hypr-workspaces")
 
 (defwidget hypr-workspaces []
   (box
     (for entry in workspaces
-      (button :class {entry.id == "special:magic" ? "special" : active-workspace == entry.id ? "ws-active" : "ws-inactive"}
+      (button :class {entry.id == "special:magic" ? "special" : entry.active ? "ws-active" : "ws-inactive"}
               :onclick "hyprctl dispatch workspace ${jq(entry, ".id")} > /dev/null"
         "${entry.name}"))))
 
@@ -13,10 +13,8 @@
   (box
     :space-evenly false
     :spacing 10
-    (ip)
-    (net-usage)
-    (ram)
-    (cpu)))
+    (netinfo)
+    (sysinfo)))
 
 ;; NETWORK
 (defwidget netinfo []
@@ -63,13 +61,22 @@
 (defwidget sysinfo []
   (box
     (ram)
-    (cpu)))
+    (cpu)
+    (procs)))
 
 (defwidget ram []
-  (label :text "RAM ${round(EWW_RAM.used_mem_perc, 1)}%"))
+  (label :text "RAM=${round(EWW_RAM.used_mem_perc, 1)}%"))
 
 (defwidget cpu []
-  (label :text "CPU ${round(EWW_CPU.avg, 1)}"))
+  (label :text "CPU=${round(EWW_CPU.avg, 1)}"))
+
+(deflisten proc_count :initial "danya02/hyprland-utils missing"
+  "/home/danya/.cargo/bin/eww-progs proc-count")
+
+(defwidget procs []
+  (label :text "PS=${proc_count['count']}${proc_count['count_1m'] >= proc_count['count']? '󰁃' : '󰁜'}"))
+
+
 
 ;; KEYBOARD
 (defvar kb-layout "English (US)")
@@ -107,14 +114,9 @@
     datetime)
 
 ;; VOLUME
-(defpoll sink-volume
-  :interval "1s"
-  :initial 0
-  "wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -d' ' -f 2")
-                       
-(defpoll sink-mute
-  :interval "0.2s"
-  "wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -d' ' -f 3")
+
+(deflisten sink-volume :initial '{"volume": 666, "is_muted": false}'
+  "/home/danya/.cargo/bin/eww-progs pulse-volume")
 
 (defvar show-vol-bar false)
 (defwidget volume []
@@ -126,7 +128,7 @@
       (revealer :transition "slideleft"
         :reveal show-vol-bar
         :duration "300ms"
-        (scale :value {sink-volume * 100}
+        (scale :value {sink-volume.volume * 100}
           :width 100
           :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%"
           :orientation "h"
@@ -136,7 +138,7 @@
       (button
         :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         :onrightclick "hyprctl dispatch exec '[float; size 30% 50%; move 65% 45%] pavucontrol'"
-        "${sink-mute == "[MUTED]" ? " " : "  "} ${round(100*sink-volume, 0)}%"))))
+        "${sink-volume.is_muted == true ? " " : "  "} ${round(100*sink-volume.volume, 0)}%"))))
 
 ; Hyprland workspaces widget sample
 ; (deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
