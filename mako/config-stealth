@@ -1,0 +1,40 @@
+sort=-time
+layer=overlay
+background-color=#00000000
+width=50
+height=12
+border-size=0
+border-color=#00000000
+border-radius=0
+icons=0
+max-icon-size=1
+default-timeout=5000
+ignore-timeout=1
+font=sans 7
+margin=0
+padding=0
+max-visible=1
+text-alignment=right
+history=0
+markup=0
+default-timeout=0
+
+[urgency=low]
+border-color=#cccccc
+
+[urgency=normal]
+border-color=#d08770
+
+[urgency=high]
+border-color=#bf616a
+default-timeout=0
+
+[category=mpd]
+default-timeout=2000
+group-by=category
+
+# Don't show this notification. Some apps don't work properly without GTK_IM_MODULE.
+# Still add it to history though.
+[app-name=Fcitx summary="Wayland Diagnose" body~=".*GTK_IM_MODULE.*"]
+invisible=1
+on-notify=dismiss
