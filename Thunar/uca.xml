@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Open Terminal Here</name>
+	<submenu></submenu>
+	<unique-id>1732537437090511-1</unique-id>
+	<command>kitty</command>
+	<description>Example for a custom action</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>emblem-package</icon>
+	<name>Zip the folder</name>
+	<submenu></submenu>
+	<unique-id>1749136282805590-1</unique-id>
+	<command>zip -r %n.zip %n</command>
+	<description></description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>document-send</icon>
+	<name>Upload to temp.sh</name>
+	<submenu></submenu>
+	<unique-id>1768770973774607-1</unique-id>
+	<command>/home/danya/.scripts/upload-temp-sh %f</command>
+	<description></description>
+	<range>1</range>
+	<patterns>*</patterns>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+</actions>
