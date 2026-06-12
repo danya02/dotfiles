@@ -42,6 +42,7 @@ x-scheme-handler/snews=userapp-Thunderbird-4A0P62.desktop;
 x-scheme-handler/webcal=userapp-Thunderbird-C8NM62.desktop;
 x-scheme-handler/webcals=userapp-Thunderbird-C8NM62.desktop;
 video/x-matroska=vlc.desktop;
+text/markdown=userapp-code-U1P4O3.desktop;
 
 [Default Applications]
 application/pdf=firefox.desktop
@@ -76,3 +77,5 @@ x-scheme-handler/nntp=userapp-Thunderbird-4A0P62.desktop
 x-scheme-handler/snews=userapp-Thunderbird-4A0P62.desktop
 x-scheme-handler/webcal=userapp-Thunderbird-C8NM62.desktop
 x-scheme-handler/webcals=userapp-Thunderbird-C8NM62.desktop
+audio/ogg=mpv.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
